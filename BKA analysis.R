@@ -1,6 +1,6 @@
 ############################################################
 ##BKA analysis 
-##written by Andrea Ayala last change 5/31/24
+##written by Andrea Ayala last change 11/26/24
 ##Reference sites:
 ##https://www.statmethods.net/management/merging.html
 ##https://www.statmethods.net/management/subset.html
@@ -66,6 +66,7 @@ library(lme4)
 library(dplyr)
 library(epitools)
 library(Epi)
+library(pwr)
 
 
 
@@ -180,6 +181,7 @@ bka_I$Lead_Imputation[bka_I$Lead_Imputation == 0] <- 1.2
 
 bka2 <- subset(bka_I,!(Mean_BKA == 999999))
 bka3 <- subset(bka2,!(Mass_g == 999999))
+
 
 #Now doing a Shapiro-Wilk's tests on the continuous variables
 
@@ -326,3 +328,22 @@ bka3$Bird_ID <- as.character(bka3$Bird_ID)
 ggplot(data = bka3, aes(x = Mean_BKA)) +
   geom_histogram() +
   labs(x ='BKA Capacity', y='Number of Mottled Ducks', title = 'Mottled Duck BKA Distributions')
+
+
+#Doing a power analysis  #https://www.r-bloggers.com/2021/05/power-analysis-in-statistics-with-r/
+
+
+
+#Choosing the power test for the GLM
+#For a one-way GLM comparing 2 groups, calculate the sample size needed 
+#in each group to obtain a power of 0.80, when the effect size is moderate (0.25) 
+#and a significance level of 0.05 is employed.
+#https://cran.r-project.org/web/packages/pwr/pwr.pdf
+#https://stats.stackexchange.com/questions/523092/numerator-degrees-of-freedom-in-power-analysis-for-regression-r-vs-gpower
+
+u = length(coef(glm.bka))-1
+
+(v <- pwr.f2.test(u = u, v = , f2 = 0.25, sig.level = .05, power = .80)$v)
+
+# Determine required sample size per Age group
+ceiling(v + u + 1)
